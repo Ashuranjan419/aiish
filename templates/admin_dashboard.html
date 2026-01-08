@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Center of Excellence</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 1.5rem; }
+        .header-actions a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 15px;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .header-actions a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .stats-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-item .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-item .label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .card-header {
+            background: #8b0000;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover { background: #f8f9fa; }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .btn-view {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn:hover { opacity: 0.8; }
+        .locked-badge {
+            background: #6c757d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🔐 Admin Dashboard</h1>
+                <small>Logged in as: {{ session.admin_username }}</small>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('change_password') }}">Change Password</a>
+                <a href="{{ url_for('admin_logout') }}">Logout</a>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="number">{{ total }}</div>
+                <div class="label">Total Patients</div>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            ⚠️ <strong>Admin Actions:</strong> Patient records are permanently locked after submission and cannot be edited. 
+            Only admins can delete records if absolutely necessary.
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>All Patient Records</h3>
+                <a href="{{ url_for('new_patient') }}" class="btn" style="background: white; color: #8b0000;">+ Add New Patient</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Case No.</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Mobile</th>
+                        <th>Date of Evaluation</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td><strong>{{ patient.case_number }}</strong></td>
+                        <td>{{ patient.name }}</td>
+                        <td>{{ patient.age }}</td>
+                        <td>{{ patient.gender }}</td>
+                        <td>{{ patient.mobile_number }}</td>
+                        <td>{{ patient.date_of_evaluation }}</td>
+                        <td><span class="locked-badge">🔒 Locked</span></td>
+                        <td>
+                            <a href="{{ url_for('view_patient', id=patient._id|string) }}" class="btn btn-view">View</a>
+                            <form action="{{ url_for('admin_delete_patient', id=patient._id|string) }}" method="POST" style="display:inline;" 
+                                  onsubmit="return confirm('⚠️ Are you sure you want to DELETE this record permanently?\n\nCase: {{ patient.case_number }}\nPatient: {{ patient.name }}\n\nThis action cannot be undone!');">
+                                <button type="submit" class="btn btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #666;">
+                            No patient records found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

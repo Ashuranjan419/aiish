@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Center of Excellence - Tinnitus and Vestibular Disorders</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #8b0000;
+            padding-bottom: 15px;
+        }
+        .nav-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            color: #8b0000;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-group label {
+            font-weight: 500;
+            color: #333;
+            white-space: nowrap;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group input[type="tel"] {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .radio-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .section-title {
+            font-weight: 600;
+            color: #333;
+            margin: 25px 0 15px 0;
+            font-size: 0.95rem;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .checkbox-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px 30px;
+            margin: 10px 0;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .checkbox-item label {
+            font-weight: normal;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .other-field {
+            margin-top: 15px;
+        }
+        .other-field input {
+            width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .submit-btn {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 50px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .submit-btn:hover {
+            background-color: #e0e0e0;
+        }
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Center of Excellence- Person with Tinnitus and Vestibular Disorders</h1>
+        
+        <div class="nav-links">
+            <a href="{{ url_for('new_patient') }}">New Patient</a>
+            <a href="{{ url_for('view_patients') }}">View All Patients</a>
+            <a href="{{ url_for('admin_login') }}">🔐 Admin Login</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('new_patient') }}">
+            <!-- Row 1: Case Number & Name -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Case Number:</label>
+                    <input type="text" name="case_number" required>
+                </div>
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" name="name" required style="width: 200px;">
+                </div>
+            </div>
+
+            <!-- Row 2: Age & Gender -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Age:</label>
+                    <input type="number" name="age" required style="width: 80px;" min="0" max="150">
+                </div>
+                <div class="form-group">
+                    <label>Gender:</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="gender" value="Male" required> Male</label>
+                        <label><input type="radio" name="gender" value="Female"> Female</label>
+                        <label><input type="radio" name="gender" value="Other"> Other</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Mobile & Date -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Mobile Number:</label>
+                    <input type="tel" name="mobile_number" required style="width: 150px;">
+                </div>
+                <div class="form-group">
+                    <label>Date of Evaluation (YYYY-MM-DD):</label>
+                    <input type="date" name="date_of_evaluation" required>
+                </div>
+            </div>
+
+            <!-- Brief History -->
+            <div class="section-title">Brief History of the Problem:</div>
+            <textarea name="brief_history" rows="4"></textarea>
+
+            <!-- Tests Conducted -->
+            <div class="section-title">Tests Conducted:</div>
+            <div class="checkbox-grid">
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Behavioural assessment" id="t1">
+                    <label for="t1">Behavioural assessment</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="VEMPs" id="t2">
+                    <label for="t2">VEMPs</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Video head Impulse test" id="t3">
+                    <label for="t3">Video head Impulse test</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Videonystagmography" id="t4">
+                    <label for="t4">Videonystagmography</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="CCG" id="t5">
+                    <label for="t5">CCG</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Stabilometry" id="t6">
+                    <label for="t6">Stabilometry</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Tests for BPPV" id="t7">
+                    <label for="t7">Tests for BPPV</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Manuevers for BPPV" id="t8">
+                    <label for="t8">Manuevers for BPPV</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="VRT recommendation" id="t9">
+                    <label for="t9">VRT recommendation</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Tinnitus evaluation" id="t10">
+                    <label for="t10">Tinnitus evaluation</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="tests_conducted" value="Tinnitus Therapy" id="t11">
+                    <label for="t11">Tinnitus Therapy</label>
+                </div>
+            </div>
+
+            <div class="other-field">
+                <label>Any other Test Performed:</label><br>
+                <input type="text" name="other_tests">
+            </div>
+
+            <!-- Instruments Used -->
+            <div class="section-title">Instruments Used:</div>
+            <div class="checkbox-grid">
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="IHS" id="i1">
+                    <label for="i1">IHS</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="Synapses vHIT" id="i2">
+                    <label for="i2">Synapses vHIT</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="Otometrics vHIT" id="i3">
+                    <label for="i3">Otometrics vHIT</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="Cyclops VNG" id="i4">
+                    <label for="i4">Cyclops VNG</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="CCG" id="i5">
+                    <label for="i5">CCG</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="Stabilometer" id="i6">
+                    <label for="i6">Stabilometer</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="FHIT" id="i7">
+                    <label for="i7">FHIT</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" name="instruments_used" value="Neuroaudio" id="i8">
+                    <label for="i8">Neuroaudio</label>
+                </div>
+            </div>
+
+            <div class="other-field">
+                <label>Any other Instrument used:</label><br>
+                <input type="text" name="other_instruments">
+            </div>
+
+            <!-- Provisional Diagnosis -->
+            <div class="section-title">Provisional Diagnosis:</div>
+            <textarea name="provisional_diagnosis" rows="4"></textarea>
+
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

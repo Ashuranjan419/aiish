@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details - {{ patient.name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #8b0000;
+            padding-bottom: 15px;
+        }
+        .nav-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            color: #8b0000;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .detail-section {
+            margin-bottom: 25px;
+        }
+        .detail-section h3 {
+            color: #8b0000;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            font-weight: 600;
+            width: 200px;
+            color: #555;
+        }
+        .detail-value {
+            flex: 1;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag {
+            background-color: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn-edit {
+            background-color: #ffc107;
+            color: #333;
+        }
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-print {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .actions {
+            margin-top: 30px;
+            text-align: center;
+        }
+        @media print {
+            .nav-links, .actions {
+                display: none;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Patient Evaluation Details</h1>
+        
+        <div class="nav-links">
+            <a href="{{ url_for('new_patient') }}">+ Add New Patient</a>
+            <a href="{{ url_for('view_patients') }}">View All Patients</a>
+            {% if is_admin %}
+            <a href="{{ url_for('admin_dashboard') }}" style="color: #667eea;">🔐 Admin Dashboard</a>
+            {% else %}
+            <a href="{{ url_for('admin_login') }}">🔐 Admin Login</a>
+            {% endif %}
+        </div>
+
+        <div class="detail-section">
+            <h3>Patient Information</h3>
+            <div class="detail-row">
+                <span class="detail-label">Case Number:</span>
+                <span class="detail-value">{{ patient.case_number }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Name:</span>
+                <span class="detail-value">{{ patient.name }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Age:</span>
+                <span class="detail-value">{{ patient.age }} years</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Gender:</span>
+                <span class="detail-value">{{ patient.gender }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Mobile Number:</span>
+                <span class="detail-value">{{ patient.mobile_number }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date of Evaluation:</span>
+                <span class="detail-value">{{ patient.date_of_evaluation }}</span>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h3>Brief History of the Problem</h3>
+            <p>{{ patient.brief_history or 'Not provided' }}</p>
+        </div>
+
+        <div class="detail-section">
+            <h3>Tests Conducted</h3>
+            {% if patient.tests_conducted %}
+            <div class="tags">
+                {% for test in patient.tests_conducted.split(',') %}
+                    {% if test.strip() %}
+                    <span class="tag">{{ test.strip() }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>None selected</p>
+            {% endif %}
+            {% if patient.other_tests %}
+            <p style="margin-top: 10px;"><strong>Other Tests:</strong> {{ patient.other_tests }}</p>
+            {% endif %}
+        </div>
+
+        <div class="detail-section">
+            <h3>Instruments Used</h3>
+            {% if patient.instruments_used %}
+            <div class="tags">
+                {% for instrument in patient.instruments_used.split(',') %}
+                    {% if instrument.strip() %}
+                    <span class="tag">{{ instrument.strip() }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>None selected</p>
+            {% endif %}
+            {% if patient.other_instruments %}
+            <p style="margin-top: 10px;"><strong>Other Instruments:</strong> {{ patient.other_instruments }}</p>
+            {% endif %}
+        </div>
+
+        <div class="detail-section">
+            <h3>Provisional Diagnosis</h3>
+            <p>{{ patient.provisional_diagnosis or 'Not provided' }}</p>
+        </div>
+
+        <div class="actions">
+            <a href="{{ url_for('view_patients') }}" class="btn btn-back">← Back to List</a>
+            <span class="btn" style="background: #6c757d; color: white;">🔒 Record Locked - Cannot Edit</span>
+            <button onclick="window.print()" class="btn btn-print">Print</button>
+        </div>
+    </div>
+</body>
+</html>
