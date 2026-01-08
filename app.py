@@ -4,13 +4,16 @@ Patient Evaluation System with Admin Protection
 Using MongoDB Atlas for Online Cloud Storage
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 from functools import wraps
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
 import hashlib
 import os
+from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 app = Flask(__name__)
 app.secret_key = 'tinnitus_vestibular_center_secure_2024_key'
@@ -115,6 +118,83 @@ def admin_dashboard():
     patients = list(db.patients.find().sort("created_at", -1))
     total_patients = len(patients)
     return render_template('admin_dashboard.html', patients=patients, total=total_patients)
+
+@app.route('/admin/export-excel')
+@admin_required
+def export_excel():
+    """Export all patient records to Excel"""
+    db = get_db()
+    patients = list(db.patients.find().sort("created_at", -1))
+    
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Patient Records"
+    
+    # Styles
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="8B0000", end_color="8B0000", fill_type="solid")
+    header_alignment = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Headers
+    headers = [
+        "S.No", "Case Number", "Name", "Age", "Gender", "Mobile Number",
+        "Date of Evaluation", "Brief History", "Tests Conducted", "Other Tests",
+        "Instruments Used", "Other Instruments", "Provisional Diagnosis", "Created At"
+    ]
+    
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+    
+    # Data rows
+    for row_num, patient in enumerate(patients, 2):
+        ws.cell(row=row_num, column=1, value=row_num-1).border = thin_border
+        ws.cell(row=row_num, column=2, value=patient.get('case_number', '')).border = thin_border
+        ws.cell(row=row_num, column=3, value=patient.get('name', '')).border = thin_border
+        ws.cell(row=row_num, column=4, value=patient.get('age', '')).border = thin_border
+        ws.cell(row=row_num, column=5, value=patient.get('gender', '')).border = thin_border
+        ws.cell(row=row_num, column=6, value=patient.get('mobile_number', '')).border = thin_border
+        ws.cell(row=row_num, column=7, value=patient.get('date_of_evaluation', '')).border = thin_border
+        ws.cell(row=row_num, column=8, value=patient.get('brief_history', '')).border = thin_border
+        ws.cell(row=row_num, column=9, value=patient.get('tests_conducted', '')).border = thin_border
+        ws.cell(row=row_num, column=10, value=patient.get('other_tests', '')).border = thin_border
+        ws.cell(row=row_num, column=11, value=patient.get('instruments_used', '')).border = thin_border
+        ws.cell(row=row_num, column=12, value=patient.get('other_instruments', '')).border = thin_border
+        ws.cell(row=row_num, column=13, value=patient.get('provisional_diagnosis', '')).border = thin_border
+        created_at = patient.get('created_at', '')
+        if created_at:
+            created_at = created_at.strftime('%Y-%m-%d %H:%M:%S') if hasattr(created_at, 'strftime') else str(created_at)
+        ws.cell(row=row_num, column=14, value=created_at).border = thin_border
+    
+    # Adjust column widths
+    column_widths = [6, 15, 20, 6, 10, 15, 15, 30, 40, 20, 40, 20, 30, 20]
+    for i, width in enumerate(column_widths, 1):
+        ws.column_dimensions[chr(64+i) if i <= 26 else 'A' + chr(64+i-26)].width = width
+    
+    # Save to BytesIO
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    # Generate filename with date
+    filename = f"patient_records_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename
+    )
 
 @app.route('/admin/change-password', methods=['GET', 'POST'])
 @admin_required
